@@ -1,0 +1,5 @@
+spring:
+  application:
+    name : st10-security
+server:
+  port: 8080
