@@ -21,4 +21,14 @@ public class Controller {
     public String admin(){
         return "admin";
     }
+
+    @GetMapping("/login")
+    public String login(){
+        return "login";
+    }
+
+    @GetMapping("/unauthorized")
+    public String unauthorized(){
+        return "unauthorized";
+    }
 }

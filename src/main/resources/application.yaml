@@ -1,5 +1,16 @@
 spring:
   application:
     name : st10-security
+  datasource:
+    url: jdbc:mysql://localhost:3306/st10_security
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
 server:
   port: 8080
+logging:
+  level:
+    org.hibernate.sql: debug
