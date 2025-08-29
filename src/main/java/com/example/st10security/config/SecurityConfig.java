@@ -43,6 +43,7 @@ public class SecurityConfig {
                         auth -> auth
                                 .requestMatchers("/","/home").permitAll()
                                 .requestMatchers("/admin").hasRole("ADMIN")
+                                .requestMatchers("/users").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
