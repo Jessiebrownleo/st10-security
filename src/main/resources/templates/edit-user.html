@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .password-toggle {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Navigation Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="/users" class="text-decoration-none">
+                            <i class="fas fa-users me-1"></i>Users
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">Edit User</li>
+                </ol>
+            </nav>
+
+            <!-- Edit User Form -->
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-user-edit me-2"></i>Edit User
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/users/update/{id}(id=${user.id})}" th:object="${userRequest}" method="post" id="editUserForm">
+                        <!-- Error Messages -->
+                        <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
+                            <h6><i class="fas fa-exclamation-circle me-2"></i>Please correct the following errors:</h6>
+                            <ul class="mb-0">
+                                <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                            </ul>
+                        </div>
+
+                        <!-- User ID Display -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-id-badge me-1"></i>User ID
+                            </label>
+                            <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-hashtag"></i>
+                                    </span>
+                                <input type="text" class="form-control" th:value="${user.id}" readonly disabled>
+                            </div>
+                        </div>
+
+                        <!-- Username Field -->
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-user me-1"></i>Username <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                <input type="text"
+                                       th:field="*{username}"
+                                       class="form-control"
+                                       id="username"
+                                       placeholder="Enter username"
+                                       required
+                                       minlength="3"
+                                       maxlength="50">
+                            </div>
+                            <div class="form-text">Username must be between 3-50 characters.</div>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+                        </div>
+
+                        <!-- Current Roles Display -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-user-tag me-1"></i>Current Roles
+                            </label>
+                            <div class="p-2 bg-light border rounded">
+                                    <span th:each="role, iterStat : ${user.roles}"
+                                          class="badge bg-secondary me-1"
+                                          th:text="${role.name}">
+                                    </span>
+                                <span th:if="${#lists.isEmpty(user.roles)}" class="text-muted">No roles assigned</span>
+                            </div>
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock me-1"></i>New Password <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                <input type="password"
+                                       th:field="*{password}"
+                                       class="form-control"
+                                       id="password"
+                                       placeholder="Enter new password"
+                                       required
+                                       minlength="6">
+                                <button class="btn btn-outline-secondary password-toggle" type="button" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Password must be at least 6 characters long. Leave empty to keep current password.</div>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                        </div>
+
+                        <!-- Password Strength Indicator -->
+                        <div class="mb-3">
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar" id="passwordStrength" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted" id="strengthText">Password strength: Weak</small>
+                        </div>
+
+                        <!-- Last Updated Info -->
+                        <div class="mb-4">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Note:</strong> Updating user information will modify the existing user account.
+                            </div>
+                        </div>
+
+                        <!-- Form Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="/users" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Users
+                            </a>
+                            <div>
+                                <button type="button" class="btn btn-outline-warning me-2" onclick="resetForm()">
+                                    <i class="fas fa-undo me-1"></i>Reset
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>Update User
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Store original values for reset functionality
+    const originalValues = {
+        username: document.getElementById('username').value,
+        password: ''
+    };
+
+    // Password visibility toggle
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = this.querySelector('i');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    });
+
+    // Reset form to original values
+    function resetForm() {
+        document.getElementById('username').value = originalValues.username;
+        document.getElementById('password').value = originalValues.password;
+
+        // Reset password strength indicator
+        const strengthBar = document.getElementById('passwordStrength');
+        const strengthText = document.getElementById('strengthText');
+        strengthBar.style.width = '0%';
+        strengthBar.className = 'progress-bar bg-danger';
+        strengthText.textContent = 'Password strength: Weak';
+    }
+
+    // Password strength indicator
+    document.getElementById('password').addEventListener('input', function() {
+        const password = this.value;
+        const strengthBar = document.getElementById('passwordStrength');
+        const strengthText = document.getElementById('strengthText');
+
+        if (password.length === 0) {
+            strengthBar.style.width = '0%';
+            strengthText.textContent = 'Password strength: Weak';
+            return;
+        }
+
+        let strength = 0;
+        let text = 'Very Weak';
+        let colorClass = 'bg-danger';
+
+        if (password.length >= 6) strength += 20;
+        if (password.match(/[a-z]/)) strength += 20;
+        if (password.match(/[A-Z]/)) strength += 20;
+        if (password.match(/[0-9]/)) strength += 20;
+        if (password.match(/[^a-zA-Z0-9]/)) strength += 20;
+
+        if (strength >= 80) {
+            text = 'Strong';
+            colorClass = 'bg-success';
+        } else if (strength >= 60) {
+            text = 'Good';
+            colorClass = 'bg-warning';
+        } else if (strength >= 40) {
+            text = 'Fair';
+            colorClass = 'bg-info';
+        } else if (strength >= 20) {
+            text = 'Weak';
+            colorClass = 'bg-warning';
+        }
+
+        strengthBar.style.width = strength + '%';
+        strengthBar.className = `progress-bar ${colorClass}`;
+        strengthText.textContent = `Password strength: ${text}`;
+    });
+
+    // Form validation feedback
+    document.getElementById('editUserForm').addEventListener('submit', function(e) {
+        const form = this;
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+
+        if (username.length < 3) {
+            e.preventDefault();
+            document.getElementById('username').classList.add('is-invalid');
+        }
+
+        if (password.length > 0 && password.length < 6) {
+            e.preventDefault();
+            document.getElementById('password').classList.add('is-invalid');
+        }
+    });
+</script>
+</body>
+</html>

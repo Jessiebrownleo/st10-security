@@ -1,518 +1,130 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
-      xmlns:sec="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Admin Dashboard</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
-            color: #e2e8f0;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-            z-index: -1;
-        }
-
-        .header {
-            background: rgba(15, 52, 96, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            animation: slideDown 0.6s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .admin-logo {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .admin-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
-        }
-
-        .logo-text {
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-link {
-            color: rgba(226, 232, 240, 0.9);
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .nav-link:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ff6b6b;
-            transform: translateY(-2px);
-        }
-
-        .logout-btn {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
-        }
-
-        .logout-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
-        }
-
-        .main-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-
-        .admin-header {
-            text-align: center;
-            margin-bottom: 4rem;
-            animation: fadeInUp 0.8s ease-out 0.2s both;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .admin-title {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24, #ffa726);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 4px 20px rgba(255, 107, 107, 0.3);
-        }
-
-        .admin-subtitle {
-            font-size: 1.3rem;
-            color: rgba(226, 232, 240, 0.8);
-            margin-bottom: 2rem;
-        }
-
-        .admin-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-
-        .admin-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            animation: fadeInUp 0.8s ease-out both;
-        }
-
-        .admin-card:nth-child(2) { animation-delay: 0.1s; }
-        .admin-card:nth-child(3) { animation-delay: 0.2s; }
-        .admin-card:nth-child(4) { animation-delay: 0.3s; }
-        .admin-card:nth-child(5) { animation-delay: 0.4s; }
-        .admin-card:nth-child(6) { animation-delay: 0.5s; }
-
-        .admin-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #ff6b6b, #ee5a24, #ffa726);
-            border-radius: 20px 20px 0 0;
-        }
-
-        .admin-card:hover {
-            transform: translateY(-10px);
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 107, 107, 0.3);
-            box-shadow:
-                    0 20px 60px rgba(255, 107, 107, 0.1),
-                    0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .card-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
-        }
-
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #e2e8f0;
-            margin-bottom: 0.8rem;
-        }
-
-        .card-description {
-            color: rgba(226, 232, 240, 0.7);
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-        }
-
-        .card-action {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
-        }
-
-        .card-action:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
-        }
-
-        .system-status {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 3rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: fadeInUp 0.8s ease-out 0.6s both;
-        }
-
-        .status-title {
-            font-size: 2rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 2rem;
-            color: #e2e8f0;
-        }
-
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-        }
-
-        .status-item {
-            text-align: center;
-            padding: 1.5rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .status-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-5px);
-        }
-
-        .status-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #ff6b6b, #ffa726);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .status-label {
-            color: rgba(226, 232, 240, 0.8);
-            font-size: 1.1rem;
-        }
-
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #10b981;
-            display: inline-block;
-            margin-left: 0.5rem;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-
-        .floating-elements {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .floating-shape {
-            position: absolute;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(238, 90, 36, 0.05));
-            animation: floatShape 20s infinite ease-in-out;
-        }
-
-        .floating-shape:nth-child(1) {
-            width: 120px;
-            height: 120px;
-            top: 10%;
-            left: 5%;
-            animation-delay: 0s;
-        }
-
-        .floating-shape:nth-child(2) {
-            width: 80px;
-            height: 80px;
-            top: 70%;
-            right: 10%;
-            animation-delay: -7s;
-        }
-
-        .floating-shape:nth-child(3) {
-            width: 100px;
-            height: 100px;
-            bottom: 15%;
-            left: 15%;
-            animation-delay: -14s;
-        }
-
-        @keyframes floatShape {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            33% { transform: translateY(-40px) rotate(120deg); }
-            66% { transform: translateY(20px) rotate(240deg); }
-        }
-
-        @media (max-width: 768px) {
-            .nav-container {
-                padding: 0 1rem;
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .nav-menu {
-                gap: 1rem;
-            }
-
-            .main-container {
-                padding: 2rem 1rem;
-            }
-
-            .admin-title {
-                font-size: 2.5rem;
-            }
-
-            .admin-cards {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .system-status {
-                padding: 2rem;
-            }
-        }
-    </style>
+    <title>User Management - Admin Panel</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-<div class="floating-elements">
-    <div class="floating-shape"></div>
-    <div class="floating-shape"></div>
-    <div class="floating-shape"></div>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">
+                        <i class="fas fa-users me-2"></i>User Management
+                    </h3>
+                    <a href="/users/create" class="btn btn-light">
+                        <i class="fas fa-plus me-1"></i>Add New User
+                    </a>
+                </div>
+                <div class="card-body">
+                    <!-- Success/Info Messages -->
+                    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>User operation completed successfully!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <!-- Users Table -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Username</th>
+                                <th scope="col">Roles</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="user : ${users}">
+                                <td th:text="${user.id}"></td>
+                                <td>
+                                    <i class="fas fa-user me-2 text-primary"></i>
+                                    <span th:text="${user.username}"></span>
+                                </td>
+                                <td>
+                                            <span th:each="role, iterStat : ${user.roles}"
+                                                  class="badge bg-secondary me-1"
+                                                  th:text="${role.name}">
+                                            </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a th:href="@{/users/edit/{id}(id=${user.id})}"
+                                           class="btn btn-sm btn-outline-primary"
+                                           title="Edit User">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                th:data-bs-target="'#deleteModal' + ${user.id}"
+                                                title="Delete User">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Delete Confirmation Modal -->
+                                    <div class="modal fade" th:id="'deleteModal' + ${user.id}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title">
+                                                        <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to delete user <strong th:text="${user.username}"></strong>?</p>
+                                                    <p class="text-muted">This action cannot be undone.</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <a th:href="@{/users/delete/{id}(id=${user.id})}"
+                                                       class="btn btn-danger">
+                                                        <i class="fas fa-trash me-1"></i>Delete User
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(users)}">
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    <i class="fas fa-users fa-3x mb-3 d-block"></i>
+                                    <h5>No users found</h5>
+                                    <p>Get started by creating your first user.</p>
+                                    <a href="/users/create" class="btn btn-primary">
+                                        <i class="fas fa-plus me-1"></i>Add First User
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Statistics Card -->
+                    <div class="row mt-4" th:unless="${#lists.isEmpty(users)}">
+                        <div class="col-md-4">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-users fa-2x mb-2"></i>
+                                    <h3 th:text="${#lists.size(users)}">0</h3>
+                                    <p class="mb-0">Total Users</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<header class="header">
-    <div class="nav-container">
-        <div class="admin-logo">
-            <div class="admin-icon">👑</div>
-            <div class="logo-text">Admin Panel</div>
-        </div>
-        <ul class="nav-menu">
-            <li><a href="#" class="nav-link">Dashboard</a></li>
-            <li><a href="#" class="nav-link">Users</a></li>
-            <li><a href="#" class="nav-link">Reports</a></li>
-            <li><a href="#" class="nav-link">Settings</a></li>
-            <li sec:authorize="isAuthenticated()">
-                <form th:action="@{/logout}" method="post" style="display: inline;">
-                    <button type="submit" class="logout-btn">Logout</button>
-                </form>
-            </li>
-            <li sec:authorize="isAnonymous()">
-                <a th:href="@{/login}" class="logout-btn">Login</a>
-            </li>
-        </ul>
-    </div>
-</header>
-
-<div class="main-container">
-    <section class="admin-header">
-        <h1 class="admin-title">Admin Dashboard</h1>
-        <p class="admin-subtitle">Manage your system with powerful administrative tools and real-time monitoring</p>
-    </section>
-
-    <div class="admin-cards">
-        <div class="admin-card">
-            <div class="card-icon">👥</div>
-            <h3 class="card-title">User Management</h3>
-            <p class="card-description">Manage user accounts, permissions, roles, and monitor user activity across the platform.</p>
-            <a href="#" class="card-action">Manage Users</a>
-        </div>
-
-        <div class="admin-card">
-            <div class="card-icon">📊</div>
-            <h3 class="card-title">Analytics & Reports</h3>
-            <p class="card-description">Access detailed analytics, generate reports, and monitor system performance metrics.</p>
-            <a href="#" class="card-action">View Reports</a>
-        </div>
-
-        <div class="admin-card">
-            <div class="card-icon">🔧</div>
-            <h3 class="card-title">System Configuration</h3>
-            <p class="card-description">Configure system settings, manage integrations, and customize platform behavior.</p>
-            <a href="#" class="card-action">Configure System</a>
-        </div>
-
-        <div class="admin-card">
-            <div class="card-icon">🔒</div>
-            <h3 class="card-title">Security Center</h3>
-            <p class="card-description">Monitor security events, manage access controls, and review audit logs for compliance.</p>
-            <a href="#" class="card-action">Security Panel</a>
-        </div>
-
-        <div class="admin-card">
-            <div class="card-icon">💾</div>
-            <h3 class="card-title">Database Management</h3>
-            <p class="card-description">Monitor database health, perform backups, and manage data integrity and optimization.</p>
-            <a href="#" class="card-action">Manage Database</a>
-        </div>
-
-        <div class="admin-card">
-            <div class="card-icon">🚀</div>
-            <h3 class="card-title">System Performance</h3>
-            <p class="card-description">Monitor system resources, optimize performance, and manage server infrastructure.</p>
-            <a href="#" class="card-action">Performance Tools</a>
-        </div>
-    </div>
-
-    <section class="system-status">
-        <h2 class="status-title">System Status <span class="status-indicator"></span></h2>
-        <div class="status-grid">
-            <div class="status-item">
-                <div class="status-value">1,247</div>
-                <div class="status-label">Active Users</div>
-            </div>
-            <div class="status-item">
-                <div class="status-value">99.9%</div>
-                <div class="status-label">System Uptime</div>
-            </div>
-            <div class="status-item">
-                <div class="status-value">2.3GB</div>
-                <div class="status-label">Memory Usage</div>
-            </div>
-            <div class="status-item">
-                <div class="status-value">45%</div>
-                <div class="status-label">CPU Load</div>
-            </div>
-            <div class="status-item">
-                <div class="status-value">847TB</div>
-                <div class="status-label">Storage Used</div>
-            </div>
-            <div class="status-item">
-                <div class="status-value">15ms</div>
-                <div class="status-label">Response Time</div>
-            </div>
-        </div>
-    </section>
-</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
